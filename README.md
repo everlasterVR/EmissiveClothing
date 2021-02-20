@@ -8,6 +8,8 @@ For more information, see the [original plugin release post on Reddit](https://w
 
 Fork this repository and create a pull request for your changes.
 
+For development, copy the Alazi dir into VaM/Custom/Assets/ so that the assetbundle is found in the expected location.
+
 ## License
 
-MIT (see file LICENSE), with the exception of src/EmissiveClothing.cs which continues to be licensed CC BY 3.0.
+MIT (see file LICENSE), except for Alazi/ dir and src/EmissiveClothing.cs which continue to be licensed under CC BY 3.0.
