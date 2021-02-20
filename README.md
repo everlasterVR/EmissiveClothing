@@ -12,4 +12,7 @@ For development, copy the Alazi dir into VaM/Custom/Assets/ so that the assetbun
 
 ## License
 
-MIT (see file LICENSE), except for Alazi/ dir and src/EmissiveClothing.cs which continue to be licensed under CC BY 3.0.
+MIT (see file LICENSE), except for the following which continue to be licensed under CC BY 3.0:
+- Alazi/ dir
+- src/EmissiveClothing.cs
+- src/EmissiveDAZSkinWrap.cs
