@@ -59,8 +59,6 @@ namespace EmissiveClothing
                 {
                     StartCoroutine(Rebuild());
                 });
-
-                StartCoroutine(LoadShaderAndInit());
             }
             catch(Exception e)
             {
@@ -75,6 +73,18 @@ namespace EmissiveClothing
             field.UItext.fontSize = 36;
             field.height = 100;
             storable.val = $"<b>{nameof(EmissiveClothing)}</b>\n<size=28>v{version}</size>";
+        }
+
+        private void OnEnable()
+        {
+            try
+            {
+                StartCoroutine(LoadShaderAndInit());
+            }
+            catch(Exception e)
+            {
+                Log.Error($"{e}");
+            }
         }
 
         public override void RestoreFromJSON(JSONClass jc, bool restorePhysical = true, bool restoreAppearance = true, JSONArray presetAtoms = null, bool setMissingToDefault = true)
@@ -315,6 +325,15 @@ namespace EmissiveClothing
         }
 
         private void OnDestroy()
+        {
+            Unbuild();
+            if(loadedAssetBundle)
+            {
+                AssetLoader.DoneWithAssetBundleFromFile(loadedShaderPath.val);
+            }
+        }
+
+        private void OnDisable()
         {
             Unbuild();
             if(loadedAssetBundle)
