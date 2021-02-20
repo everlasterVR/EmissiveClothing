@@ -1,10 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using MeshVR;
+using SimpleJSON;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using MeshVR;
-using SimpleJSON;
+using UnityEngine;
 
 namespace EmissiveClothing
 {
@@ -18,12 +18,12 @@ namespace EmissiveClothing
 
         private const string version = "<Version>";
 
-        JSONStorableFloat alpha;
-        JSONStorableBool renderOriginal;
-        JSONStorableUrl loadedShaderPath = new JSONStorableUrl("shader", "");
-        bool loadedAssetBundle;
-        bool isLoading;
-        int retryAttempts;
+        private JSONStorableFloat alpha;
+        private JSONStorableBool renderOriginal;
+        private JSONStorableUrl loadedShaderPath = new JSONStorableUrl("shader", "");
+        private bool loadedAssetBundle;
+        private bool isLoading;
+        private int retryAttempts;
 
         private static readonly string BUNDLE_PATH = "Custom/Assets/Alazi/EmissiveClothing/emissiveshader.assetbundle";
 
@@ -32,11 +32,12 @@ namespace EmissiveClothing
         protected List<DAZSkinWrap> wraps = new List<DAZSkinWrap>();
         protected JSONStorableColor color;
 
-        JSONStorableBool mode;
+        private JSONStorableBool mode;
 
         public override void Init()
         {
-            try {
+            try
+            {
                 TitleUITextField();
 
                 color = new JSONStorableColor("Color", HSVColorPicker.RGBToHSV(1f, 1f, 1f), _ => SyncMats());
@@ -54,12 +55,15 @@ namespace EmissiveClothing
 
                 RegisterUrl(loadedShaderPath);
 
-                CreateButton("Rescan active clothes").button.onClick.AddListener(() => {
+                CreateButton("Rescan active clothes").button.onClick.AddListener(() =>
+                {
                     StartCoroutine(Rebuild());
-                    });
-                
+                });
+
                 StartCoroutine(LoadShaderAndInit());
-            } catch (Exception e) {
+            }
+            catch(Exception e)
+            {
                 Log.Error($"{e}");
             }
         }
@@ -79,7 +83,7 @@ namespace EmissiveClothing
             base.RestoreFromJSON(jc, restorePhysical, restoreAppearance, presetAtoms, setMissingToDefault);
         }
 
-        string GetPluginPath() // basically straight from VAMDeluxe's Dollmaster
+        private string GetPluginPath() // basically straight from VAMDeluxe's Dollmaster
         {
             string pluginId = this.storeId.Split('_')[0];
             string pathToScriptFile = manager.GetJSON(true, true)["plugins"][pluginId].Value;
@@ -89,17 +93,18 @@ namespace EmissiveClothing
 
         private void SyncMats()
         {
-            foreach (var r in ourMaterials) {
-                foreach (var m in r) {
-                    if (m == null)
+            foreach(var r in ourMaterials)
+            {
+                foreach(var m in r)
+                {
+                    if(m == null)
                         continue;
                     Color c = color.colorPicker.currentColor;
-                    if (mode.val)
+                    if(mode.val)
                         c.a = alpha.val;
                     else
                         c *= alpha.val;
                     m.SetColor("_Color", c);
-                    
                 }
             }
         }
@@ -113,13 +118,15 @@ namespace EmissiveClothing
 
         // MeshVR.AssetLoader provides some nice refcounting for us.
         // The downsides are the annoying callback API, that we can't suppress error messages, and that a refcount really shouldn't be created on failure, wat
-        class LoadAssetBundle : CustomYieldInstruction {
-            AssetLoader.AssetBundleFromFileRequest req;
+        private class LoadAssetBundle : CustomYieldInstruction
+        {
+            private AssetLoader.AssetBundleFromFileRequest req;
 
             private bool done;
 
             // We can't write the type AssetBundle, but we can call methods on it. lolwut C#
             public bool success => req.assetBundle != null;
+
             public T GetAsset<T>(string name) where T : UnityEngine.Object
             {
                 return req.assetBundle?.LoadAsset<T>(name);
@@ -127,11 +134,13 @@ namespace EmissiveClothing
 
             public LoadAssetBundle(string url)
             {
-                req = new AssetLoader.AssetBundleFromFileRequest {
+                req = new AssetLoader.AssetBundleFromFileRequest
+                {
                     path = url,
-                    callback = _ => {
+                    callback = _ =>
+                    {
                         done = true;
-                        if (req.assetBundle == null)
+                        if(req.assetBundle == null)
                             AssetLoader.DoneWithAssetBundleFromFile(req.path);
                     }
                 };
@@ -143,37 +152,45 @@ namespace EmissiveClothing
 
         private IEnumerator AttemptLoadShader(string url)
         {
-            if (shader != null)
+            if(shader != null)
                 yield break;
             var request = new LoadAssetBundle(url);
             yield return StartCoroutine(request);
 
-            if (!request.success)
+            if(!request.success)
                 yield break;
             shader = request.GetAsset<Shader>("Assets/EmissiveHack.shader");
-            if (shader != null) {
+            if(shader != null)
+            {
                 loadedShaderPath.val = url;
                 loadedAssetBundle = true;
-            } else {
+            }
+            else
+            {
                 Log.Error("Bad emissiveshader assetbundle");
                 AssetLoader.DoneWithAssetBundleFromFile(url);
             }
         }
 
-        // If there are multiple copies of this script loaded from different paths, avoid failures due to trying to load the same assetbundle. 
+        // If there are multiple copies of this script loaded from different paths, avoid failures due to trying to load the same assetbundle.
         // This is particularly important because sometimes the bundle seems to get leaked and not unload the shader.
         // Stash the url as well so that vac saves work properly even if this happens
         private static readonly string STASH_NAME = "Alazi.EmissiveShaderStash";
+
         private void StashShaderName()
         {
             PlayerPrefs.SetString(STASH_NAME, loadedShaderPath.val);
         }
+
         private void LoadStashedShader()
         {
             shader = Resources.FindObjectsOfTypeAll<Shader>().Where(s => s.name == "Custom/Alazi/ExtraEmissiveComputeBuff").FirstOrDefault();
-            if (shader != null) {
+            if(shader != null)
+            {
                 loadedShaderPath.val = PlayerPrefs.GetString(STASH_NAME);
-            } else {
+            }
+            else
+            {
                 PlayerPrefs.DeleteKey(STASH_NAME);
             }
         }
@@ -184,12 +201,14 @@ namespace EmissiveClothing
             yield return new WaitForEndOfFrame();
             LoadStashedShader();
 
-            if (shader == null) {
-                if (loadedShaderPath.val != "")
+            if(shader == null)
+            {
+                if(loadedShaderPath.val != "")
                     yield return AttemptLoadShader(loadedShaderPath.val);
-                yield return AttemptLoadShader($"Custom/Assets/{BUNDLE_NAME}");
+                yield return AttemptLoadShader(BUNDLE_PATH);
 
-                if (shader == null) {
+                if(shader == null)
+                {
                     Log.Error("Failed to load shader");
                     yield break;
                 }
@@ -206,45 +225,52 @@ namespace EmissiveClothing
             yield return new WaitForEndOfFrame();
             Build();
         }
+
         protected void Build()
         {
             var allWraps = containingAtom.gameObject.GetComponentsInChildren<DAZSkinWrap>(false);
             ourMaterials = new List<Material[]>();
             wraps = new List<DAZSkinWrap>();
-            if (allWraps.Length == 0) {
+            if(allWraps.Length == 0)
+            {
                 Log.Message("No clothes loaded");
                 return;
             }
             bool doRescan = false;
-            foreach (var wrap in allWraps) {
-                if (wrap.ToString().Contains("Emissive")) {
+            foreach(var wrap in allWraps)
+            {
+                if(wrap.ToString().Contains("Emissive"))
+                {
                     Log.Error($"EmissiveClothing: found dup {wrap}");
                     continue;
                 }
-                if (wrap.skin.delayDisplayOneFrame) {
+                if(wrap.skin.delayDisplayOneFrame)
+                {
                     Log.Error($"EmissiveClothing: {wrap} is delayed, not set up to handle that");
                     continue;
                 }
                 var ourMats = new Material[wrap.GPUmaterials.Length];
                 var theirNewMats = wrap.GPUmaterials.ToArray();
                 bool foundAny = false;
-                
-                foreach (var mo in wrap.GetComponents<DAZSkinWrapMaterialOptions>()) {
-                    if (!mo.overrideId.Contains("(em)"))
+
+                foreach(var mo in wrap.GetComponents<DAZSkinWrapMaterialOptions>())
+                {
+                    if(!mo.overrideId.Contains("(em)"))
                         continue;
                     // too lazy to duplicate all the code for slots2 / simpleMaterial
-                    if (mo.paramMaterialSlots?.Length == 0) 
+                    if(mo.paramMaterialSlots?.Length == 0)
                         continue;
                     foundAny = true;
-                    
-                    foreach (var i in mo.paramMaterialSlots) {
+
+                    foreach(var i in mo.paramMaterialSlots)
+                    {
                         var mat = wrap.GPUmaterials[i];
                         var ourMat = new Material(shader);
                         ourMats[i] = ourMat;
                         ourMat.name = mat.name;
 
-                        // Ideally we'd hook all the config stuff in MaterialOptions, but that would 
-                        // require too much effort to reimplement all the url/tile/offset->texture code 
+                        // Ideally we'd hook all the config stuff in MaterialOptions, but that would
+                        // require too much effort to reimplement all the url/tile/offset->texture code
                         // or to copy the existing one to override the relevant methods
                         // So require the user to hit rescan manually.
                         var tex = mat.GetTexture("_DecalTex");
@@ -252,7 +278,7 @@ namespace EmissiveClothing
                         mat.SetTexture("_DecalTex", null);
 
                         // Particularly during scene load it may take a while for these to be loaded, try a few times
-                        if (tex == null)
+                        if(tex == null)
                             doRescan = true;
 
                         // could maybe get some tiny extra performance by using a null shader instead
@@ -260,7 +286,7 @@ namespace EmissiveClothing
                         theirNewMats[i].SetFloat("_AlphaAdjust", -1);
                     }
                 }
-                if (!foundAny)
+                if(!foundAny)
                     continue;
 
                 ourMaterials.Add(ourMats);
@@ -271,7 +297,7 @@ namespace EmissiveClothing
             }
 
             SyncMats();
-            if (doRescan)
+            if(doRescan)
                 StartCoroutine(QueueRescan());
             else
                 isLoading = false;
@@ -280,53 +306,58 @@ namespace EmissiveClothing
         private IEnumerator QueueRescan()
         {
             // 1s normally or 40s during load
-            if (retryAttempts < 5 || (isLoading && retryAttempts < 200)) {
+            if(retryAttempts < 5 || (isLoading && retryAttempts < 200))
+            {
                 yield return new WaitForSeconds(0.2f);
                 retryAttempts++;
                 yield return Rebuild();
             }
         }
 
-        void Unbuild()
+        private void Unbuild()
         {
-            for (int i = 0; i < wraps.Count; i++) {
+            for(int i = 0; i < wraps.Count; i++)
+            {
                 var wrap = wraps[i];
                 var mats = ourMaterials[i];
-                for (int j = 0; j < mats.Length; j++) {
-                    if (mats[j] == null)
+                for(int j = 0; j < mats.Length; j++)
+                {
+                    if(mats[j] == null)
                         continue;
                     // If it's been changed, don't reset it
-                    if (wrap.GPUmaterials[j].GetTexture("_DecalTex") == null)
+                    if(wrap.GPUmaterials[j].GetTexture("_DecalTex") == null)
                         wrap.GPUmaterials[j].SetTexture("_DecalTex", mats[j].GetTexture("_MainTex"));
                 }
 
                 GameObject.Destroy(wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>());
                 wrap.draw = true;
                 var control = wrap.gameObject?.GetComponent<DAZSkinWrapControl>();
-                if (control && (control.wrap == null || control.wrap == this)) {
+                if(control && (control.wrap == null || control.wrap == this))
+                {
                     control.wrap = wrap;
                 }
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             Unbuild();
-            if (loadedAssetBundle) {
+            if(loadedAssetBundle)
+            {
                 AssetLoader.DoneWithAssetBundleFromFile(loadedShaderPath.val);
             }
         }
 
-        // The only thing we absolutely need and can't get normally from 
+        // The only thing we absolutely need and can't get normally from
         // DAZSkinWrap is the ComputeBuffers; Material.GetBuffer does not exist
-        class EmissiveDAZSkinWrap : DAZSkinWrap
+        private class EmissiveDAZSkinWrap : DAZSkinWrap
         {
-            Dictionary<int, ComputeBuffer> emissiveMaterialVertsBuffers = new Dictionary<int, ComputeBuffer>();
+            private Dictionary<int, ComputeBuffer> emissiveMaterialVertsBuffers = new Dictionary<int, ComputeBuffer>();
 
-            JSONStorableBool renderOriginal;
-            bool oldOriginal;
-            Material[] hiddenMats;
-            Material[] emissiveMats;
+            private JSONStorableBool renderOriginal;
+            private bool oldOriginal;
+            private Material[] hiddenMats;
+            private Material[] emissiveMats;
 
             public void CopyFrom(DAZSkinWrap wrap, Material[] hiddenMats, Material[] emissiveMats, JSONStorableBool renderOriginal)
             {
@@ -353,32 +384,37 @@ namespace EmissiveClothing
                 base.defaultAdditionalThicknessMultiplier = wrap.defaultAdditionalThicknessMultiplier;
 
                 var control = GetComponent<DAZSkinWrapControl>();
-                if (control && (control.wrap == null || control.wrap == wrap)) {
+                if(control && (control.wrap == null || control.wrap == wrap))
+                {
                     control.wrap = this;
                 }
             }
 
-
-            void LateUpdate() // Overwrite base one to possibly not render some mats
+            private void LateUpdate() // Overwrite base one to possibly not render some mats
             {
                 UpdateVertsGPU();
-                if (renderOriginal.val != oldOriginal) {
+                if(renderOriginal.val != oldOriginal)
+                {
                     materialVertsBuffers.Clear();
                     materialNormalsBuffers.Clear();
                     materialTangentsBuffers.Clear();
                     oldOriginal = renderOriginal.val;
                 }
-                if (!renderOriginal.val) {
+                if(!renderOriginal.val)
+                {
                     var temp = base.GPUmaterials;
                     base.GPUmaterials = hiddenMats;
                     DrawMeshGPU();
                     base.GPUmaterials = temp;
-                } else {
+                }
+                else
+                {
                     DrawMeshGPU();
                 }
-                
-                for (int i = 0; i < emissiveMats.Length; i++) {
-                    if (emissiveMats[i] == null)
+
+                for(int i = 0; i < emissiveMats.Length; i++)
+                {
+                    if(emissiveMats[i] == null)
                         continue;
                     emissiveMats[i].renderQueue = base.GPUmaterials[i].renderQueue; // could probably get away without updating this past initialization
                     UpdateBuffer(emissiveMaterialVertsBuffers, base.materialVertsBuffers, "verts", i);
@@ -392,12 +428,12 @@ namespace EmissiveClothing
                 ComputeBuffer ourB, theirB;
                 ours.TryGetValue(i, out ourB);
                 theirs.TryGetValue(i, out theirB);
-                if (ourB != theirB) {
+                if(ourB != theirB)
+                {
                     emissiveMats[i].SetBuffer(buf, theirB);
                     ours[i] = theirB;
                 }
             }
         }
     }
-
 }
