@@ -16,6 +16,8 @@ namespace EmissiveClothing
          * https://github.com/alazi/CUAController/releases
          */
 
+        private const string version = "<Version>";
+
         JSONStorableFloat alpha;
         JSONStorableBool renderOriginal;
         JSONStorableUrl loadedShaderPath = new JSONStorableUrl("shader", "");
@@ -23,7 +25,7 @@ namespace EmissiveClothing
         bool isLoading;
         int retryAttempts;
 
-        private static readonly string BUNDLE_NAME = "emissiveshader.assetbundle";
+        private static readonly string BUNDLE_PATH = "Custom/Assets/Alazi/EmissiveClothing/emissiveshader.assetbundle";
 
         protected List<Material[]> ourMaterials = new List<Material[]>();
         protected Shader shader;
@@ -35,6 +37,8 @@ namespace EmissiveClothing
         public override void Init()
         {
             try {
+                TitleUITextField();
+
                 color = new JSONStorableColor("Color", HSVColorPicker.RGBToHSV(1f, 1f, 1f), _ => SyncMats());
                 RegisterColor(color);
                 CreateColorPicker(color, true);
@@ -59,6 +63,16 @@ namespace EmissiveClothing
                 Log.Error($"{e}");
             }
         }
+
+        private void TitleUITextField()
+        {
+            JSONStorableString storable = new JSONStorableString("title", "");
+            UIDynamicTextField field = CreateTextField(storable);
+            field.UItext.fontSize = 36;
+            field.height = 100;
+            storable.val = $"<b>{nameof(EmissiveClothing)}</b>\n<size=28>v{version}</size>";
+        }
+
         public override void RestoreFromJSON(JSONClass jc, bool restorePhysical = true, bool restoreAppearance = true, JSONArray presetAtoms = null, bool setMissingToDefault = true)
         {
             isLoading = true;
@@ -173,7 +187,6 @@ namespace EmissiveClothing
             if (shader == null) {
                 if (loadedShaderPath.val != "")
                     yield return AttemptLoadShader(loadedShaderPath.val);
-                yield return AttemptLoadShader($"{GetPluginPath()}/{BUNDLE_NAME}");
                 yield return AttemptLoadShader($"Custom/Assets/{BUNDLE_NAME}");
 
                 if (shader == null) {
