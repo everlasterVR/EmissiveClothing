@@ -315,14 +315,15 @@ namespace EmissiveClothing
 
                 }
 
-                Destroy(wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>());
-                wrap.draw = true;
-
+                var emissiveWrap = wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>();
                 var control = wrap.gameObject?.GetComponent<DAZSkinWrapControl>();
-                if(control && (control.wrap == null || control.wrap == this))
+                if(control && (control.wrap == null || control.wrap == emissiveWrap))
                 {
                     control.wrap = wrap;
                 }
+
+                Destroy(emissiveWrap);
+                wrap.draw = true;
             }
         }
 
