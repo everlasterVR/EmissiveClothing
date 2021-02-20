@@ -56,7 +56,7 @@ namespace EmissiveClothing
                 
                 StartCoroutine(LoadShaderAndInit());
             } catch (Exception e) {
-                SuperController.LogError("Exception caught: " + e);
+                Log.Error($"{e}");
             }
         }
         public override void RestoreFromJSON(JSONClass jc, bool restorePhysical = true, bool restoreAppearance = true, JSONArray presetAtoms = null, bool setMissingToDefault = true)
@@ -141,7 +141,7 @@ namespace EmissiveClothing
                 loadedShaderPath.val = url;
                 loadedAssetBundle = true;
             } else {
-                SuperController.LogError("Bad emissiveshader assetbundle");
+                Log.Error("Bad emissiveshader assetbundle");
                 AssetLoader.DoneWithAssetBundleFromFile(url);
             }
         }
@@ -177,7 +177,7 @@ namespace EmissiveClothing
                 yield return AttemptLoadShader($"Custom/Assets/{BUNDLE_NAME}");
 
                 if (shader == null) {
-                    SuperController.LogError("Failed to load shader");
+                    Log.Error("Failed to load shader");
                     yield break;
                 }
                 StashShaderName();
@@ -199,17 +199,17 @@ namespace EmissiveClothing
             ourMaterials = new List<Material[]>();
             wraps = new List<DAZSkinWrap>();
             if (allWraps.Length == 0) {
-                SuperController.LogMessage("No clothes loaded");
+                Log.Message("No clothes loaded");
                 return;
             }
             bool doRescan = false;
             foreach (var wrap in allWraps) {
                 if (wrap.ToString().Contains("Emissive")) {
-                    SuperController.LogError($"EmissiveClothing: found dup {wrap}");
+                    Log.Error($"EmissiveClothing: found dup {wrap}");
                     continue;
                 }
                 if (wrap.skin.delayDisplayOneFrame) {
-                    SuperController.LogError($"EmissiveClothing: {wrap} is delayed, not set up to handle that");
+                    Log.Error($"EmissiveClothing: {wrap} is delayed, not set up to handle that");
                     continue;
                 }
                 var ourMats = new Material[wrap.GPUmaterials.Length];
