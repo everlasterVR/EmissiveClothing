@@ -172,34 +172,10 @@ namespace EmissiveClothing
             }
         }
 
-        // If there are multiple copies of this script loaded from different paths, avoid failures due to trying to load the same assetbundle.
-        // This is particularly important because sometimes the bundle seems to get leaked and not unload the shader.
-        // Stash the url as well so that vac saves work properly even if this happens
-        private static readonly string STASH_NAME = "Alazi.EmissiveShaderStash";
-
-        private void StashShaderName()
-        {
-            PlayerPrefs.SetString(STASH_NAME, loadedShaderPath.val);
-        }
-
-        private void LoadStashedShader()
-        {
-            shader = Resources.FindObjectsOfTypeAll<Shader>().Where(s => s.name == "Custom/Alazi/ExtraEmissiveComputeBuff").FirstOrDefault();
-            if(shader != null)
-            {
-                loadedShaderPath.val = PlayerPrefs.GetString(STASH_NAME);
-            }
-            else
-            {
-                PlayerPrefs.DeleteKey(STASH_NAME);
-            }
-        }
-
         protected IEnumerator LoadShaderAndInit()
         {
             // Wait until json load is done
             yield return new WaitForEndOfFrame();
-            LoadStashedShader();
 
             if(shader == null)
             {
@@ -212,7 +188,6 @@ namespace EmissiveClothing
                     Log.Error("Failed to load shader");
                     yield break;
                 }
-                StashShaderName();
             }
 
             Build();
@@ -329,7 +304,7 @@ namespace EmissiveClothing
                         wrap.GPUmaterials[j].SetTexture("_DecalTex", mats[j].GetTexture("_MainTex"));
                 }
 
-                GameObject.Destroy(wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>());
+                Destroy(wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>());
                 wrap.draw = true;
                 var control = wrap.gameObject?.GetComponent<DAZSkinWrapControl>();
                 if(control && (control.wrap == null || control.wrap == this))
