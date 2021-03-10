@@ -1,0 +1,22 @@
+{
+   "licenseType" : "CC BY", 
+   "creatorName" : "everlaster", 
+   "packageName" : "EmissiveClothing", 
+   "standardReferenceVersionOption" : "Latest", 
+   "scriptReferenceVersionOption" : "Exact", 
+   "description" : "v<Version>. Allows treating clothing as having emissive components to their textures (aka always lit up regions).",
+   "credits" : "Alazi. This is a patched version of Alazi.EmissiveClothing.1.var (CC BY) downloaded from https://github.com/alazi/CUAController/releases.", 
+   "instructions" : "Users: Add to a Person atom that has a compatible clothing item active.\nCreators: Put \"(em)\" in the name any materials which you want to have an emissive component, and use _DecalTex for that emissive component.", 
+   "promotionalLink" : "https://github.com/everlasterVR/EmissiveClothing", 
+   "programVersion" : "1.20.77.9", 
+   "contentList" : [ 
+      "Custom/Assets/Alazi/EmissiveClothing/emissiveshader.assetbundle",
+      "Custom/Scripts/everlaster/EmissiveClothing/EmissiveClothing.cslist", 
+      "Custom/Scripts/everlaster/EmissiveClothing/src"
+   ], 
+   "dependencies" : { 
+   },
+   "customOptions" : { 
+      "preloadMorphs" : "false"
+   }
+}

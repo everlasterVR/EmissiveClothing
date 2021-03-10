@@ -83,7 +83,9 @@
     <Compile Include="src\EmissiveClothing.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
     <None Include="EmissiveClothing.cslist" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

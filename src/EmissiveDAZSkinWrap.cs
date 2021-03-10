@@ -3,9 +3,15 @@ using UnityEngine;
 
 namespace EmissiveClothing
 {
+    /*
+     * LICENSE: Creative Commons with Attribution (CC BY 3.0) https://creativecommons.org/licenses/by/3.0/
+     * Originally released by Alazi under CC BY 3.0
+     * https://github.com/alazi/CUAController/releases
+     */
+
     // The only thing we absolutely need and can't get normally from
     // DAZSkinWrap is the ComputeBuffers; Material.GetBuffer does not exist
-    class EmissiveDAZSkinWrap : DAZSkinWrap
+    internal class EmissiveDAZSkinWrap : DAZSkinWrap
     {
         private Dictionary<int, ComputeBuffer> emissiveMaterialVertsBuffers = new Dictionary<int, ComputeBuffer>();
 
@@ -16,27 +22,27 @@ namespace EmissiveClothing
 
         public void CopyFrom(DAZSkinWrap wrap, Material[] hiddenMats, Material[] emissiveMats, JSONStorableBool renderOriginal)
         {
-            base.skinTransform = wrap.skinTransform;
-            base.skin = wrap.skin;
-            base.dazMesh = wrap.dazMesh;
-            base.GPUSkinWrapper = wrap.GPUSkinWrapper;
-            base.GPUMeshCompute = wrap.GPUMeshCompute;
-            base.CopyMaterials();
-            base.GPUmaterials = wrap.GPUmaterials;
+            skinTransform = wrap.skinTransform;
+            skin = wrap.skin;
+            dazMesh = wrap.dazMesh;
+            GPUSkinWrapper = wrap.GPUSkinWrapper;
+            GPUMeshCompute = wrap.GPUMeshCompute;
+            CopyMaterials();
+            GPUmaterials = wrap.GPUmaterials;
             this.renderOriginal = renderOriginal;
             this.hiddenMats = hiddenMats;
             this.emissiveMats = emissiveMats;
 
-            base.wrapName = wrap.wrapName;
-            base.wrapStore = wrap.wrapStore;
+            wrapName = wrap.wrapName;
+            wrapStore = wrap.wrapStore;
 
             wrap.draw = false;
-            base.draw = true;
+            draw = true;
 
-            base.surfaceOffset = wrap.surfaceOffset;
-            base.defaultSurfaceOffset = wrap.defaultSurfaceOffset;
-            base.additionalThicknessMultiplier = wrap.additionalThicknessMultiplier;
-            base.defaultAdditionalThicknessMultiplier = wrap.defaultAdditionalThicknessMultiplier;
+            surfaceOffset = wrap.surfaceOffset;
+            defaultSurfaceOffset = wrap.defaultSurfaceOffset;
+            additionalThicknessMultiplier = wrap.additionalThicknessMultiplier;
+            defaultAdditionalThicknessMultiplier = wrap.defaultAdditionalThicknessMultiplier;
 
             var control = GetComponent<DAZSkinWrapControl>();
             if(control && (control.wrap == null || control.wrap == wrap))
@@ -57,10 +63,10 @@ namespace EmissiveClothing
             }
             if(!renderOriginal.val)
             {
-                var temp = base.GPUmaterials;
-                base.GPUmaterials = hiddenMats;
+                var temp = GPUmaterials;
+                GPUmaterials = hiddenMats;
                 DrawMeshGPU();
-                base.GPUmaterials = temp;
+                GPUmaterials = temp;
             }
             else
             {

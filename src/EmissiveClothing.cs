@@ -312,7 +312,6 @@ namespace EmissiveClothing
                     // If it's been changed, don't reset it
                     if(wrap.GPUmaterials[j].GetTexture("_DecalTex") == null)
                         wrap.GPUmaterials[j].SetTexture("_DecalTex", mats[j].GetTexture("_MainTex"));
-
                 }
 
                 var emissiveWrap = wrap.gameObject?.GetComponent<EmissiveDAZSkinWrap>();

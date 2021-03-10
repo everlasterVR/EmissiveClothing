@@ -12,7 +12,8 @@ For development, copy the Alazi dir into VaM/Custom/Assets/ so that the assetbun
 
 ## License
 
-MIT (see file LICENSE), except for the following which continue to be licensed under CC BY 3.0:
-- Alazi/ dir
-- src/EmissiveClothing.cs
-- src/EmissiveDAZSkinWrap.cs
+[MIT](https://github.com/everlasterVR/EmissiveClothing/blob/master/LICENSE.md), except for:
+
+- [Alazi/ dir](https://github.com/everlasterVR/EmissiveClothing/blob/master/Alazi/) - CC BY 3.0
+- [src/EmissiveClothing.cs](https://github.com/everlasterVR/EmissiveClothing/blob/master/src/EmissiveClothing.cs) - CC BY 3.0
+- [src/EmissiveDAZSkinWrap.cs](https://github.com/everlasterVR/EmissiveClothing/blob/master/src/EmissiveDAZSkinWrap.cs) - CC BY 3.0
